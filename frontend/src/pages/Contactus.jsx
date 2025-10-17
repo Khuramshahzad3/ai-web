@@ -49,18 +49,23 @@ const Contactus = () => {
 
     setStatus({ message: "Sending...", type: "sending" });
 
+    // For Vercel deployment, we need to set the proper headers
     try {
-      const endpoint = `${API_URL}/auth/contactus`;
-      console.log(`Sending request to: ${endpoint}`);
+      console.log(`Sending request to: ${API_URL}/auth/contactus`);
 
       const response = await axios.post(
-        endpoint,
+        `${API_URL}/auth/contactus`,
         formData,
         {
           headers: {
             "Content-Type": "application/json",
+            // Add an origin header to help with CORS debugging
+            "X-Requested-From": window.location.origin
           },
+          // Keep credentials for cookie passing if needed
           withCredentials: true,
+          // Add timeout to prevent hanging requests
+          timeout: 15000
         }
       );
 
@@ -82,6 +87,7 @@ const Contactus = () => {
         response: error.response?.data,
         status: error.response?.status,
         headers: error.response?.headers,
+        url: `${API_URL}/auth/contactus`
       });
 
       let errorMessage = "A network error occurred. Please try again later.";

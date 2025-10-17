@@ -15,39 +15,46 @@ const allowedOrigins = [
   'http://localhost:5173'
 ];
 
-// Updated CORS configuration to prevent redirect issues
+// Updated CORS configuration for Vercel deployment
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.indexOf(origin) !== -1) {
+      // For Vercel serverless functions, we need to be more permissive
+      // with preflight checks
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         console.log("Blocked origin:", origin);
+        // Still allow the request to proceed but with restricted CORS
         callback(null, false);
       }
     },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
-    maxAge: 86400, // Cache preflight request for 24 hours
-    exposedHeaders: ["Content-Range", "X-Content-Range"],
-    preflightContinue: false // Important for preventing redirects on preflight
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+    allowedHeaders: ["Content-Type", "Authorization"],
+    preflightContinue: false,
+    optionsSuccessStatus: 204
   })
 );
 
-// FIX: Remove the problematic app.options line
-// Instead, handle OPTIONS requests properly
+// Set explicit CORS headers for all routes
 app.use((req, res, next) => {
-  if (req.method === 'OPTIONS') {
+  const origin = req.headers.origin;
+
+  // Always set these headers for better Vercel compatibility
+  res.header("Access-Control-Allow-Origin", origin && allowedOrigins.includes(origin) ? origin : "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Credentials", "true");
+
+  if (req.method === "OPTIONS") {
     return res.status(204).end();
   }
+
   next();
 });
 
-// Debug middleware to log all requests
+// Debug middleware
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url} from origin: ${req.headers.origin}`);
   next();
