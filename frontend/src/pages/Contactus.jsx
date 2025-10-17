@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { MdLocationOn, MdEmail, MdPhone } from "react-icons/md";
+import axios from "axios"; // Import axios
+
+// Import API URL from environment
+const API_URL = import.meta.env.VITE_BACKEND_URL ;
 
 const Contactus = () => {
   // 1. Initialize state for form data
@@ -23,7 +27,7 @@ const Contactus = () => {
     }));
   };
 
-  // 4. Handle form submission
+  // 4. Handle form submission with axios and environment variable
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent default form submission
 
@@ -41,42 +45,42 @@ const Contactus = () => {
     setStatus({ message: "Sending...", type: "sending" });
 
     try {
-      const response = await fetch("https://aiteg-api.vercel.app/auth/contactus", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      console.log(`Sending request to: ${API_URL}/auth/contactus`);
 
-      if (response.ok) {
-        console.log("Message sent successfully:", formData);
-        setStatus({
-          message: "Message sent successfully! We'll be in touch soon.",
-          type: "success",
-        });
-        setFormData({
-          name: "",
-          email: "",
-          subject: "",
-          message: "",
-        });
-      } else {
-        const errorData = await response.json();
-        console.error("Error sending message:", errorData);
-        setStatus({
-          message: `Failed to send message: ${
-            errorData.message || response.statusText
-          }`,
-          type: "error",
-        });
-      }
-    } catch (error) {
-      // Handle network errors
-      console.error("Error sending message:", error);
+      const response = await axios.post(
+        `${API_URL}/auth/contactus`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+
+
+      console.log("Message sent successfully:", response.data);
       setStatus({
-        message: "A network error occurred. Please try again later.",
+        message: "Message sent successfully! We'll be in touch soon.",
+        type: "success",
+      });
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
+    } catch (error) {
+      // Axios error handling
+      console.error("Error sending message:", error);
+
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "A network error occurred. Please try again later.";
+
+      setStatus({
+        message: `Failed to send message: ${errorMessage}`,
         type: "error",
       });
     }
