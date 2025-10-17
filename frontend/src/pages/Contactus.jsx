@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MdLocationOn, MdEmail, MdPhone } from "react-icons/md";
-import axios from "axios"; // Import axios
+import axios from "axios";
 
-// Import API URL from environment
-const API_URL = import.meta.env.VITE_BACKEND_URL ;
+// Import API URL from environment with fallback
+const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
 const Contactus = () => {
   // 1. Initialize state for form data
@@ -18,6 +18,11 @@ const Contactus = () => {
     message: null,
     type: null,
   });
+
+  useEffect(() => {
+    // Log API URL on component mount for debugging
+    console.log("Using API URL:", API_URL);
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -46,7 +51,9 @@ const Contactus = () => {
 
     try {
       console.log(`Sending request to: ${API_URL}/auth/contactus`);
+      console.log("Form data:", formData);
 
+      // Add timeout to prevent long-hanging requests
       const response = await axios.post(
         `${API_URL}/auth/contactus`,
         formData,
@@ -55,11 +62,12 @@ const Contactus = () => {
             "Content-Type": "application/json",
           },
           withCredentials: true,
+          timeout: 10000, // 10 second timeout
         }
       );
 
+      console.log("Server response:", response);
 
-      console.log("Message sent successfully:", response.data);
       setStatus({
         message: "Message sent successfully! We'll be in touch soon.",
         type: "success",
@@ -71,13 +79,28 @@ const Contactus = () => {
         message: "",
       });
     } catch (error) {
-      // Axios error handling
-      console.error("Error sending message:", error);
+      console.error("Error details:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        headers: error.response?.headers,
+      });
 
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "A network error occurred. Please try again later.";
+      let errorMessage = "A network error occurred. Please try again later.";
+
+      if (error.response) {
+        // The server responded with a status code outside of 2xx range
+        if (error.response.status === 500) {
+          errorMessage = "Server error. Please contact the administrator.";
+        } else {
+          errorMessage =
+            error.response.data?.message ||
+            `Error ${error.response.status}: ${error.response.statusText}`;
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        errorMessage = "No response from server. Please check your connection.";
+      }
 
       setStatus({
         message: `Failed to send message: ${errorMessage}`,
