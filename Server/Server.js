@@ -15,12 +15,11 @@ const allowedOrigins = [
   'http://localhost:5173'
 ];
 
-// Simplified CORS for Vercel deployment
 app.use(cors({
-  origin: '*', // Use wildcard for Vercel; specific origins are handled by vercel.json
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  credentials: true
+  origin:'*', // Replace with the frontend URL
+  methods: 'GET, POST, PUT, DELETE', // Methods you want to allow
+  allowedHeaders: 'Content-Type, Authorization', // Headers you want to allow
+ // credentials: true, // Include cookies in the requests sent to the server
 }));
 
 // Set CORS headers before any routes
@@ -61,6 +60,7 @@ app.use(express.json());
 // ===============================
 // ✅ Routes
 // ===============================
+app.use(express.json());
 app.use("/auth", router);
 
 // ===============================
