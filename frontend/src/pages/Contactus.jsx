@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { MdLocationOn, MdEmail, MdPhone } from "react-icons/md";
 import axios from "axios";
 
-// Import API URL from environment with fallback
-const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+// Import API URL from environment - ensure it doesn't have a trailing slash
+const API_URL = (import.meta.env.VITE_BACKEND_URL || 'https://ai-web-ivory-nine.vercel.app').replace(/\/$/, '');
 
 const Contactus = () => {
   // 1. Initialize state for form data
@@ -50,19 +50,17 @@ const Contactus = () => {
     setStatus({ message: "Sending...", type: "sending" });
 
     try {
-      console.log(`Sending request to: ${API_URL}/auth/contactus`);
-      console.log("Form data:", formData);
+      const endpoint = `${API_URL}/auth/contactus`;
+      console.log(`Sending request to: ${endpoint}`);
 
-      // Add timeout to prevent long-hanging requests
       const response = await axios.post(
-        `${API_URL}/auth/contactus`,
+        endpoint,
         formData,
         {
           headers: {
             "Content-Type": "application/json",
           },
           withCredentials: true,
-          timeout: 10000, // 10 second timeout
         }
       );
 
