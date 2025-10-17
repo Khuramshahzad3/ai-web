@@ -38,19 +38,12 @@ app.use("/auth", router);
 // ✅ MongoDB connection with improved error handling
 // ===============================
 // Local fallback connection string
-const LOCAL_MONGO_URI = "mongodb://127.0.0.1:27017/aitegdb";
+console.log("server started");
 
 console.log("Attempting to connect to MongoDB...");
 // Add proper connection options and better error handling
 mongoose
-  .connect(process.env.MONGO || LOCAL_MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    retryWrites: true,
-    w: "majority",
-    connectTimeoutMS: 30000, // 30 seconds
-    socketTimeoutMS: 45000, // 45 seconds
-  })
+  .connect(process.env.MONGO )
   .then(() => {
     console.log("✅ MongoDB connection successful");
   })
