@@ -68,7 +68,7 @@ const Home = () => {
         {/* The content overlay stays the same and is always visible */}
         <div className="relative z-10 text-white text-center px-6 md:px-16 space-y-6 max-w-4xl">
           <h1 className="text-4xl md:text-6xl font-extrabold leading-tight shadow-text">
-            Where <span className="text-[#02C6C8]">Learning</span> Meets{" "}
+            Where khuram<span className="text-[#02C6C8]">Learning</span> Meets{" "}
             <span className="text-[#02C6C8]">Technology</span> &{" "}
             <span className="text-[#02C6C8]">Innovation</span>
           </h1>
